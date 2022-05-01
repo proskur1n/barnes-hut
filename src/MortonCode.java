@@ -1,7 +1,8 @@
 public class MortonCode {
+
     // Maximum number of subdivisions along a single dimension that can be stored in
     // a single long (3 * 21 < 64 bits).
-    public static final long PRECISION = 21;
+    public static final int PRECISION = 21;
     public static final long CLUSTERS_PER_DIMENSION = 1 << PRECISION;
     public static final long CLUSTERS = 1 << (3 * PRECISION);
     // Bitwise-AND INDEX_MASK with the value returned by get(...) to get the next
