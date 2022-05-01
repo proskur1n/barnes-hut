@@ -1,11 +1,14 @@
-RUN_OPTIONS := -ea -classpath build:lib/CodeDraw.jar
-MAIN_FILE := Simulation4
+RUN_OPTIONS := -classpath build:lib/CodeDraw.jar
+MAIN_FILE := Simulation
 TEST_FILE := Test
 
 compile: build/$(MAIN_FILE).class
 
 run: compile
 	java $(RUN_OPTIONS) $(MAIN_FILE)
+
+benchmark: build/Benchmark.class
+	java $(RUN_OPTIONS) Benchmark
 
 clean:
 	rm -rf build
