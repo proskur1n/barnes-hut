@@ -85,12 +85,12 @@ public class Octree {
 
 class OctreeNode {
 
-    private Body representative;
+    private Massive representative;
     private long rmask;
     private OctreeNode[] children;
 
-    public OctreeNode(Body body, long mask) {
-        this.representative = body;
+    public OctreeNode(Massive massive, long mask) {
+        this.representative = massive;
         this.rmask = mask;
     }
 
@@ -108,7 +108,7 @@ class OctreeNode {
             children = new OctreeNode[8];
             children[index] = new OctreeNode(representative, rmask >>> 3);
             // Representative will later be used for the Barnes-Hut algorithm.
-            representative = representative.makePartialCopy();
+            representative = new Massive(representative);
         }
 
         boolean inserted = false;
@@ -123,7 +123,7 @@ class OctreeNode {
         if (inserted) {
             // Representative stores the total mass and average position of all
             // inserted bodies.
-            Body.partialMerge(representative, body);
+            Massive.merge(representative, body);
         }
         return inserted;
     }
