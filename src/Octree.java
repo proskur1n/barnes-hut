@@ -22,15 +22,15 @@ public class Octree {
     public void rebuild(Body[] bodies) {
         this.root = null;
         this.numberOfBodies = 0;
-        for (int i = 0; i < bodies.length; ++i) {
-            insert(bodies[i]);
+        for (Body body : bodies) {
+            insert(body);
         }
     }
 
     // Tries to insert the body into the octree and returns false if body could
     // not be inserted. This can happen if body is outside this octree or
     // MAX_DEPTH was reached during insertion.
-    public boolean insert(Body body) {
+    private boolean insert(Body body) {
         long mask = body.getMortonCode(corner, size);
         if (mask < 0) {
             // Body lies outside this octree.
@@ -58,8 +58,8 @@ public class Octree {
         if (root == null) {
             return;
         }
-        for (int i = 0; i < bodies.length; ++i) {
-            root.addForceTo(bodies[i], threshold, size);
+        for (Body body : bodies) {
+            root.addForceTo(body, threshold, size);
         }
     }
 
@@ -142,9 +142,9 @@ class OctreeNode {
             return;
         }
 
-        for (int i = 0; i < 8; ++i) {
-            if (children[i] != null) {
-                children[i].addForceTo(body, threshold, size / 2);
+        for (OctreeNode node : children) {
+            if (node != null) {
+                node.addForceTo(body, threshold, size / 2);
             }
         }
     }

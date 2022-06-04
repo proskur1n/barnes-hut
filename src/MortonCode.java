@@ -5,9 +5,8 @@ public class MortonCode {
     public static final int PRECISION = 21;
     public static final long CLUSTERS_PER_DIMENSION = 1 << PRECISION;
     public static final long CLUSTERS = 1 << (3 * PRECISION);
-    // Bitwise-AND INDEX_MASK with the value returned by get(...) to get the next
-    // octant index. You can right-shift the morton code to get the following
-    // indices.
+    // Bitwise-AND INDEX_MASK with the value returned by get(...) to get the
+    // next octant index. You can right-shift morton code to get the next index.
     public static final long INDEX_MASK = 0b111;
 
     // Takes 3 floating point values between [0, 1) and returns the corresponding
@@ -29,7 +28,6 @@ public class MortonCode {
         return Long.reverse(m) >>> 1;
     }
 
-    // Returns true if 0 <= 'val' < CLUSTERS_PER_DIMENSION
     private static boolean inRange(long val) {
         return 0 <= val && val < CLUSTERS_PER_DIMENSION;
     }
