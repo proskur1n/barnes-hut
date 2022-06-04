@@ -22,9 +22,10 @@ public class Massive {
     // Merges the mass and position of 'a' and 'b' and saves the result in 'a'.
     // Massive 'b' remains unchanged.
     public static void merge(Massive a, Massive b) {
-        // TODO replace with simple math ?
-        double f = b.mass / (a.mass + b.mass);
-        Vector3.mix(a.position, b.position, f);
-        a.mass = a.mass + b.mass;
+        double totalMass = a.mass + b.mass;
+        Vector3 v1 = a.position.times(a.mass);
+        Vector3 v2 = b.position.times(b.mass);
+        a.position = v1.plus(v2).times(1 / totalMass);
+        a.mass = totalMass;
     }
 }

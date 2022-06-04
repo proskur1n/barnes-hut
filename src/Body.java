@@ -33,6 +33,12 @@ public class Body extends Massive {
         this.color = color;
     }
 
+    public double radius() {
+        final double SUN_MASS = 1.989e30;
+        final double SUN_RADIUS = 696340e3;
+        return SUN_RADIUS * Math.sqrt(mass / SUN_MASS);
+    }
+
     // Adds the gravitational force exerted by 'b' on this body. The current
     // position and velocity remain unchanged until you call update.
     public void addGravitationalForceFrom(Massive b) {
@@ -64,8 +70,7 @@ public class Body extends Massive {
 
     public void draw(CodeDraw cd) {
         cd.setColor(color);
-        // TODO remove this mass to radius
-        position.drawAsFilledCircle(cd, SpaceDraw.massToRadius(mass));
+        position.drawAsFilledCircle(cd, radius());
     }
 
     private static Color getRandomColor() {

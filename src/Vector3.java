@@ -81,13 +81,4 @@ public class Vector3 {
         a.y += b.y * m;
         a.z += b.z * m;
     }
-
-    // Performs linear interpolation of vectors 'a' and 'b' with the coefficient
-    // 'f', and stores the result in 'a'. Result is calculated as
-    // a = a * (1 - f) + b * f.
-    public static void mix(Vector3 a, Vector3 b, double f) {
-        a.x = a.x * (1.0 - f) + b.x * f;
-        a.y = a.y * (1.0 - f) + b.y * f;
-        a.z = a.z * (1.0 - f) + b.z * f;
-    }
 }
