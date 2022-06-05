@@ -23,9 +23,8 @@ public class Massive {
 	// Massive 'b' remains unchanged.
 	public static void merge(Massive a, Massive b) {
 		double totalMass = a.mass + b.mass;
-		Vector3 v1 = a.position.times(a.mass);
-		Vector3 v2 = b.position.times(b.mass);
-		a.position = v1.plus(v2).times(1 / totalMass);
+		double f = b.mass / totalMass;
+		Vector3.mix(a.position, b.position, f);
 		a.mass = totalMass;
 	}
 }
