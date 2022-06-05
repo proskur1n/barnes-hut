@@ -21,6 +21,7 @@ public class Simulation {
 
 	public static void main(String[] args) {
 		CodeDraw cd = new CodeDraw();
+		cd.setTitle("Barnes-Hut Simulation");
 		Random random = new Random(2022);
 		Body[] bodies = new Body[NUMBER_OF_BODIES];
 		Octree octree = new Octree(new Vector3(), SECTION_SIZE);
