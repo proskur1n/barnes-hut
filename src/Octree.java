@@ -81,13 +81,6 @@ public class Octree {
 		}
 		cd.setAntiAliased(true);
 	}
-
-	public double largestVoidOctantVolume() {
-		if (root == null) {
-			return Math.pow(size, 3);
-		}
-		return root.largestVoidOctantVolume(size);
-	}
 }
 
 class OctreeNode {
@@ -169,23 +162,6 @@ class OctreeNode {
 				children[i].visualize(cd, newX, newY, w / 2);
 			}
 		}
-	}
-
-	public double largestVoidOctantVolume(double size) {
-		// Wenn ein Node existiert, dann kann dieser nicht leer sein.
-		if (isLeaf()) {
-			return Math.pow(size / 2, 3);
-		}
-		double max = 0;
-		for (OctreeNode node : children) {
-			if (node == null) {
-				double volume = Math.pow(size / 2 , 3);
-				max = Math.max(max, volume);
-			} else {
-				max = Math.max(max, node.largestVoidOctantVolume(size / 2));
-			}
-		}
-		return max;
 	}
 
 	private boolean isLeaf() {

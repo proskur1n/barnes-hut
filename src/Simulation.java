@@ -43,7 +43,6 @@ public class Simulation {
 		for (int seconds = 0;; ++seconds) {
 			octree.rebuild(bodies);
 			octree.calculateForce(bodies, THRESHOLD);
-			System.out.println(octree.largestVoidOctantVolume());
 			for (Body body : bodies) {
 				body.update(DELTA_TIME);
 			}
@@ -53,7 +52,7 @@ public class Simulation {
 				for (Body body : bodies) {
 					body.draw(cd);
 				}
-				octree.visualize(cd);
+				// octree.visualize(cd);
 				cd.show();
 			}
 		}
