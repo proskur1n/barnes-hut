@@ -36,18 +36,13 @@ public class Octree {
 			// Body lies outside this octree.
 			return false;
 		}
-
 		if (root == null) {
 			root = new OctreeNode(body, mask);
-			numberOfBodies = 1;
-			return true;
+		} else if (!root.insert(body, mask, 0)) {
+			return false;
 		}
-
-		if (root.insert(body, mask, 0)) {
-			++numberOfBodies;
-			return true;
-		}
-		return false;
+		++numberOfBodies;
+		return true;
 	}
 
 	// Uses the Barnes-Hut algorithm to calculate gravitational forces between
@@ -111,21 +106,19 @@ class OctreeNode {
 			representative = new Massive(representative);
 		}
 
-		boolean inserted = false;
 		int index = (int) (mask & MortonCode.INDEX_MASK);
 		if (children[index] == null) {
 			children[index] = new OctreeNode(body, mask >>> 3);
-			inserted = true;
 		} else {
-			inserted = children[index].insert(body, mask >>> 3, depth + 1);
+			if (!children[index].insert(body, mask >>> 3, depth + 1)) {
+				return false;
+			}
 		}
 
-		if (inserted) {
-			// Representative stores the total mass and average position of all
-			// inserted bodies.
-			Massive.merge(representative, body);
-		}
-		return inserted;
+		// Representative stores the total mass and average position of all
+		// inserted bodies.
+		Massive.merge(representative, body);
+		return true;
 	}
 
 	// Approximates the gravitational force exerted on body by all the other
@@ -154,7 +147,6 @@ class OctreeNode {
 			cd.drawRectangle(x, y, w, w);
 			return;
 		}
-
 		for (int i = 0; i < 8; ++i) {
 			if (children[i] != null) {
 				double newX = x + ((i % 4) % 2) * w / 2;
