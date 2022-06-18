@@ -4,15 +4,15 @@ import java.util.Random;
 
 public class Simulation {
 
-	// --- Physics constants, do not change ---
+	// --- Physics constants ---
 	public static final double G = 6.6743e-11;
 	public static final double AU = 150e9; // Astronomical unit
 
-	// --- Simulation constants ---
+	// --- Simulation parameters ---
 	public static final int NUMBER_OF_BODIES = 10000;
 	public static final double SECTION_SIZE = 2 * AU;
 
-	// --- Performance constants ---
+	// --- Performance parameters ---
 	// Threshold for Barned-Hut approximation.
 	public static final double THRESHOLD = 1.0;
 	// Artificially speed up the simumulation.
