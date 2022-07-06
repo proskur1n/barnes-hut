@@ -4,10 +4,10 @@ import java.awt.Color;
 
 public class Body {
 
-	private Vector3 position;
-	private Vector3 velocity;
+	private final Vector3 position;
+	private final Vector3 velocity;
+	private final double mass;
 	private Vector3 force;
-	private double mass;
 	private Color color;
 
 	private static final Color[] palette = {
@@ -19,8 +19,8 @@ public class Body {
 	public Body(double mass, Vector3 position, Vector3 velocity) {
 		this.position = position;
 		this.velocity = velocity;
-		this.force = new Vector3(0.0);
 		this.mass = mass;
+		this.force = new Vector3(0.0);
 		this.color = getRandomColor();
 	}
 
@@ -57,7 +57,7 @@ public class Body {
 	}
 
 	// Moves the body according to its current force and velocity. Afterwards,
-	// this bodie's force is reset to 0.
+	// this body's force is reset to 0.
 	public void update(double deltaTime) {
 		Vector3 acceleration = force.times(1 / mass); // F = m*a -> a = F/m
 		Vector3.multThenAdd(velocity, acceleration, deltaTime);

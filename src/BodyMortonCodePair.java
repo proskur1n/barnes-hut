@@ -4,7 +4,7 @@ import java.util.NoSuchElementException;
 // simplify insertion into the octree.
 public class BodyMortonCodePair {
 
-	private Body body;
+	private final Body body;
 	private long mortonCode;
 
 	public BodyMortonCodePair(Body body, Vector3 corner, double size) {

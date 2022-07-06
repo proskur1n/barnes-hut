@@ -3,8 +3,8 @@ import codedraw.Palette;
 
 public class Octree {
 
-	private Vector3 corner;
-	private double size;
+	private final Vector3 corner;
+	private final double size;
 	private OctreeNode root;
 	private int numberOfBodies;
 
@@ -40,7 +40,7 @@ public class Octree {
 	public void calculateForce(Body[] bodies) {
 		if (root != null) {
 			for (Body body : bodies) {
-				root.addForceTo(body, size);
+				root.addForceTo(body);
 			}
 		}
 	}
@@ -67,7 +67,7 @@ class OctreeNode {
 	private OctreeNode[] children;
 	private Vector3 averagePosition;
 	private double totalMass;
-	private double sizeOverThresholdSqrd;
+	private final double sizeOverThresholdSqrd;
 
 	public OctreeNode(BodyMortonCodePair pair, double sizeOverThresholdSqrd) {
 		this.pair = pair;
@@ -99,19 +99,19 @@ class OctreeNode {
 
 	// Approximates the gravitational force exerted on body by all the other
 	// bodies inside this octant.
-	public void addForceTo(Body body, double size) {
+	public void addForceTo(Body body) {
 		if (averagePosition == body.position()) {
 			// Trying to calculate the gravitational force between a body and
 			// itself leads to NaN.
 			return;
 		}
-		if (isLeaf() || canApproximate(body, size)) {
+		if (isLeaf() || canApproximate(body)) {
 			body.addForceFrom(averagePosition, totalMass);
 			return;
 		}
 		for (OctreeNode node : children) {
 			if (node != null) {
-				node.addForceTo(body, size / 2);
+				node.addForceTo(body);
 			}
 		}
 	}
@@ -136,7 +136,7 @@ class OctreeNode {
 
 	// Returns whether the gravitational force from all bodies within this
 	// octant can be approximated as if they were a single body.
-	private boolean canApproximate(Body body, double size) {
+	private boolean canApproximate(Body body) {
 		return sizeOverThresholdSqrd < body.distanceSqrd(averagePosition);
 	}
 }
