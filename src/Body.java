@@ -50,44 +50,11 @@ public class Body {
 	// 'position2' and 'mass2' on this body. The current position and velocity
 	// remain unchanged until you call update.
 	public void addForceFrom(Vector3 position2, double mass2) {
-		// TODO: Refactor
-		// I got a large speedup from 66ms to only 39ms for 10000 bodies by
-		// simply replacing Vector3 with pure math.
-		double dx = position2.x - position.x;
-		double dy = position2.y - position.y;
-		double dz = position2.z - position.z;
-		double len = Math.sqrt(dx * dx + dy * dy + dz * dz);
-		double m = Simulation.G * mass * mass2 / (len * len * len);
-		force.x += dx * m;
-		force.y += dy * m;
-		force.z += dz * m;
-		// Vector3 direction = b.position.minus(position);
-		// double distance = direction.length();
-		// direction.normalize();
-		// double force = Simulation.G * mass * b.mass / (distance * distance);
-		// this.force = this.force.plus(direction.times(force));
+		Vector3 delta = position2.minus(position);
+		double len = delta.length();
+		double ff = Simulation.G * mass * mass2 / (len * len * len);
+		Vector3.multThenAdd(force, delta, ff);
 	}
-
-	// TODO: Refactor ?
-	// Adds the gravitational force exerted by 'b' on this body. The current
-	// position and velocity remain unchanged until you call update.
-	// public void addForceFrom(Massive b) {
-	// 	// I got a large speedup from 66ms to only 39ms for 10000 bodies by
-	// 	// simply replacing Vector3 with pure math.
-	// 	double dx = b.position.x - position.x;
-	// 	double dy = b.position.y - position.y;
-	// 	double dz = b.position.z - position.z;
-	// 	double len = Math.sqrt(dx * dx + dy * dy + dz * dz);
-	// 	double m = Simulation.G * mass * b.mass / (len * len * len);
-	// 	force.x += dx * m;
-	// 	force.y += dy * m;
-	// 	force.z += dz * m;
-	// 	// Vector3 direction = b.position.minus(position);
-	// 	// double distance = direction.length();
-	// 	// direction.normalize();
-	// 	// double force = Simulation.G * mass * b.mass / (distance * distance);
-	// 	// this.force = this.force.plus(direction.times(force));
-	// }
 
 	// Moves the body according to its current force and velocity. Afterwards,
 	// this bodie's force is reset to 0.
