@@ -3,9 +3,6 @@ import codedraw.Palette;
 
 public class Octree {
 
-	// Root node has the depth 0.
-	public static final int MAX_DEPTH = MortonCode.PRECISION;
-
 	private Vector3 corner;
 	private double size;
 	private OctreeNode root;
@@ -23,38 +20,28 @@ public class Octree {
 		this.root = null;
 		this.numberOfBodies = 0;
 		for (Body body : bodies) {
-			insert(body);
+			BodyMortonCodePair pair = new BodyMortonCodePair(body, corner, size);
+			if (pair.hasNextOctant()) {
+				if (root == null) {
+					double st = size / Simulation.THRESHOLD;
+					root = new OctreeNode(pair, st * st);
+				} else {
+					root.insert(pair);
+				}
+				++numberOfBodies;
+			}
 		}
-	}
-
-	// Tries to insert the body into the octree and returns false if body could
-	// not be inserted. This can happen if body is outside this octree or
-	// MAX_DEPTH was reached during insertion.
-	private boolean insert(Body body) {
-		long mask = body.getMortonCode(corner, size);
-		if (mask < 0) {
-			// Body lies outside this octree.
-			return false;
-		}
-		if (root == null) {
-			root = new OctreeNode(body, mask);
-		} else if (!root.insert(body, mask, 0)) {
-			return false;
-		}
-		++numberOfBodies;
-		return true;
 	}
 
 	// Uses the Barnes-Hut algorithm to calculate gravitational forces between
-	// bodies. Threshold controls the accuracy of force approximation. A larger
+	// bodies. THRESHOLD controls the accuracy of force approximation. A larger
 	// threshold value means an inaccurate but faster simulation. Do not forget
 	// to rebuild the octree before calling this function.
-	public void calculateForce(Body[] bodies, double threshold) {
-		if (root == null) {
-			return;
-		}
-		for (Body body : bodies) {
-			root.addForceTo(body, threshold, size);
+	public void calculateForce(Body[] bodies) {
+		if (root != null) {
+			for (Body body : bodies) {
+				root.addForceTo(body, size);
+			}
 		}
 	}
 
@@ -68,11 +55,7 @@ public class Octree {
 		cd.setLineWidth(1.0);
 		cd.setAntiAliased(false);
 		if (root != null) {
-			double factor = cd.getWidth() / Simulation.SECTION_SIZE;
-			double x = (corner.x + Simulation.SECTION_SIZE / 2) * factor;
-			double y = (corner.y + Simulation.SECTION_SIZE / 2) * factor;
-			double w = size * factor;
-			root.visualize(cd, x, y, w);
+			root.visualize(cd, corner, size);
 		}
 		cd.setAntiAliased(true);
 	}
@@ -80,78 +63,69 @@ public class Octree {
 
 class OctreeNode {
 
-	private Massive representative;
-	private long rmask;
+	private BodyMortonCodePair pair;
 	private OctreeNode[] children;
+	private Vector3 averagePosition;
+	private double totalMass;
+	private double sizeOverThresholdSqrd;
 
-	public OctreeNode(Massive massive, long mask) {
-		this.representative = massive;
-		this.rmask = mask;
+	public OctreeNode(BodyMortonCodePair pair, double sizeOverThresholdSqrd) {
+		this.pair = pair;
+		this.averagePosition = pair.position();
+		this.totalMass = pair.mass();
+		this.sizeOverThresholdSqrd = sizeOverThresholdSqrd;
 	}
 
-	// Tries to recursively insert body into the octree. Returns false if
-	// MAX_DEPTH was reached while descending the tree.
-	public boolean insert(Body body, long mask, int depth) {
-		if (depth >= Octree.MAX_DEPTH) {
-			// Can't go go deeper than MAX_DEPTH. Refuse to insert the point.
-			return false;
-		}
-
+	// Tries to recursively insert body into the octree.
+	public void insert(BodyMortonCodePair newPair) {
 		if (isLeaf()) {
 			// Split the leaf into 8 octants.
-			int index = (int) (rmask & MortonCode.INDEX_MASK);
 			children = new OctreeNode[8];
-			children[index] = new OctreeNode(representative, rmask >>> 3);
-			// Representative will later be used for the Barnes-Hut algorithm.
-			representative = new Massive(representative);
+			children[pair.nextOctant()] = new OctreeNode(pair, sizeOverThresholdSqrd / 4);
+			pair = null;
 		}
 
-		int index = (int) (mask & MortonCode.INDEX_MASK);
+		int index = newPair.nextOctant();
 		if (children[index] == null) {
-			children[index] = new OctreeNode(body, mask >>> 3);
+			children[index] = new OctreeNode(newPair, sizeOverThresholdSqrd / 4);
 		} else {
-			if (!children[index].insert(body, mask >>> 3, depth + 1)) {
-				return false;
-			}
+			children[index].insert(newPair);
 		}
 
-		// Representative stores the total mass and average position of all
-		// inserted bodies.
-		Massive.merge(representative, body);
-		return true;
+		this.averagePosition = Vector3.merge(averagePosition, totalMass,
+				newPair.position(), newPair.mass());
+		this.totalMass += newPair.mass();
 	}
 
 	// Approximates the gravitational force exerted on body by all the other
 	// bodies inside this octant.
-	public void addForceTo(Body body, double threshold, double size) {
-		if (representative == body) {
+	public void addForceTo(Body body, double size) {
+		if (averagePosition == body.position()) {
 			// Trying to calculate the gravitational force between a body and
 			// itself leads to NaN.
 			return;
 		}
-
-		if (isLeaf() || canApproximateWithBarnesHut(body, threshold, size)) {
-			body.addGravitationalForceFrom(representative);
+		if (isLeaf() || canApproximate(body, size)) {
+			body.addForceFrom(averagePosition, totalMass);
 			return;
 		}
-
 		for (OctreeNode node : children) {
 			if (node != null) {
-				node.addForceTo(body, threshold, size / 2);
+				node.addForceTo(body, size / 2);
 			}
 		}
 	}
 
-	public void visualize(CodeDraw cd, double x, double y, double w) {
+	public void visualize(CodeDraw cd, Vector3 corner, double size) {
 		if (isLeaf()) {
-			cd.drawRectangle(x, y, w, w);
+			corner.drawAsSquare(cd, size);
 			return;
 		}
 		for (int i = 0; i < 8; ++i) {
 			if (children[i] != null) {
-				double newX = x + ((i % 4) % 2) * w / 2;
-				double newY = y + ((i % 4) / 2) * w / 2;
-				children[i].visualize(cd, newX, newY, w / 2);
+				double x = ((i % 4) % 2) * size / 2;
+				double y = ((i % 4) / 2) * size / 2;
+				children[i].visualize(cd, corner.plus(new Vector3(x, y, 0)), size / 2);
 			}
 		}
 	}
@@ -160,7 +134,9 @@ class OctreeNode {
 		return children == null;
 	}
 
-	private boolean canApproximateWithBarnesHut(Body body, double threshold, double size) {
-		return size * size < threshold * threshold * body.distanceSqrd(representative);
+	// Returns whether the gravitational force from all bodies within this
+	// octant can be approximated as if they were a single body.
+	private boolean canApproximate(Body body, double size) {
+		return sizeOverThresholdSqrd < body.distanceSqrd(averagePosition);
 	}
 }

@@ -7,32 +7,16 @@ public class Vector3 {
 	public double y;
 	public double z;
 
-	public Vector3() {
-	}
-
 	public Vector3(double x, double y, double z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
 	}
 
-	public Vector3(Vector3 v) {
-		this.x = v.x;
-		this.y = v.y;
-		this.z = v.z;
-	}
-
 	public Vector3(double value) {
 		this.x = value;
 		this.y = value;
 		this.z = value;
-	}
-
-	// TODO: Remove ?
-	public void setToZero() {
-		this.x = 0;
-		this.y = 0;
-		this.z = 0;
 	}
 
 	public Vector3 plus(Vector3 v) {
@@ -58,9 +42,11 @@ public class Vector3 {
 		z /= len;
 	}
 
-	// TODO refactor
 	public double distanceSqrd(Vector3 v) {
-		return (v.x - x) * (v.x - x) + (v.y - y) * (v.y - y) + (v.z - z) * (v.z - z);
+		double dx = v.x - x;
+		double dy = v.y - y;
+		double dz = v.z - z;
+		return dx * dx + dy * dy + dz * dz;
 	}
 
 	public String toString() {
@@ -78,26 +64,41 @@ public class Vector3 {
 	// coordinates of this vector in the canvas associated with 'cd'. The
 	// z-coordinate is not used.
 	public void drawAsFilledCircle(CodeDraw cd, double radius) {
-		double factor = cd.getWidth() / Simulation.SECTION_SIZE;
-		cd.fillCircle(
-				(x + Simulation.SECTION_SIZE / 2) * factor,
-				(y + Simulation.SECTION_SIZE / 2) * factor,
-				Math.max(radius * factor, 1.5));
+		Vector3 p = projectOnScreen(cd);
+		cd.fillCircle(p.x, p.y, Math.max(p.z * radius, 1.5));
 	}
 
-	// Calculates a + b * m and stores the result in a.
+	// Draws a square with its top-left corner at the (x, y) coordinates of this
+	// vector. The z coordinate is not used.
+	public void drawAsSquare(CodeDraw cd, double width) {
+		Vector3 p = projectOnScreen(cd);
+		cd.drawRectangle(p.x, p.y, p.z * width, p.z * width);
+	}
+
+	private Vector3 projectOnScreen(CodeDraw cd) {
+		double factor = cd.getWidth() / Simulation.SECTION_SIZE;
+		return new Vector3(
+				(x + Simulation.SECTION_SIZE / 2) * factor,
+				(y + Simulation.SECTION_SIZE / 2) * factor,
+				factor);
+	}
+
+	// Calculates a + b * m and stores the result in a. Be aware of the side
+	// effects, as this method changes the vector in-place.
 	public static void multThenAdd(Vector3 a, Vector3 b, double m) {
 		a.x += b.x * m;
 		a.y += b.y * m;
 		a.z += b.z * m;
 	}
 
-	// Performs linear interpolation of vectors 'a' and 'b' with the coefficient
-	// 'f', and stores the result in 'a'. Result is calculated as
-	// a = a * (1 - f) + b * f.
-	public static void mix(Vector3 a, Vector3 b, double f) {
-		a.x = a.x * (1.0 - f) + b.x * f;
-		a.y = a.y * (1.0 - f) + b.y * f;
-		a.z = a.z * (1.0 - f) + b.z * f;
+	// Performs linear interpolation of vectors 'v1' and 'v2' with the
+	// coefficients 'f1' und 'f2'.
+	// Result is calculated as (v1 * f1 + v2 * f2) / (f1 + f2).
+	public static Vector3 merge(Vector3 v1, double f1, Vector3 v2, double f2) {
+		double f = 1.0 / (f1 + f2);
+		return new Vector3(
+				(v1.x * f1 + v2.x * f2) * f,
+				(v1.y * f1 + v2.y * f2) * f,
+				(v1.z * f1 + v2.z * f2) * f);
 	}
 }
