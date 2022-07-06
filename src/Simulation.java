@@ -13,9 +13,9 @@ public class Simulation {
 	public static final double SECTION_SIZE = 2 * AU;
 
 	// --- Performance parameters ---
-	// Threshold for Barned-Hut approximation.
+	// Threshold for Barnes-Hut approximation.
 	public static final double THRESHOLD = 1.0;
-	// Artificially speed up the simumulation.
+	// Artificially speed up the simulation.
 	public static final double DELTA_TIME = 70.0;
 	public static final int DRAW_EVERY_NTH_FRAME = 1;
 
@@ -24,7 +24,7 @@ public class Simulation {
 		cd.setTitle("Barnes-Hut Simulation");
 		Random random = new Random(2022);
 		Body[] bodies = new Body[NUMBER_OF_BODIES];
-		Octree octree = new Octree(new Vector3(), SECTION_SIZE);
+		Octree octree = new Octree(new Vector3(0.0), SECTION_SIZE);
 
 		Vector3 center1 = new Vector3(AU / 3);
 		Vector3 center2 = new Vector3(-AU / 3);
@@ -42,7 +42,7 @@ public class Simulation {
 
 		for (int seconds = 0;; ++seconds) {
 			octree.rebuild(bodies);
-			octree.calculateForce(bodies, THRESHOLD);
+			octree.calculateForce(bodies);
 			for (Body body : bodies) {
 				body.update(DELTA_TIME);
 			}
