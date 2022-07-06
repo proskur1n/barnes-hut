@@ -4,16 +4,12 @@ public class MortonCode {
 	// a single long (3 * 21 < 64 bits).
 	public static final int PRECISION = 21;
 	public static final long CLUSTERS_PER_DIMENSION = 1 << PRECISION;
-	public static final long CLUSTERS = 1 << (3 * PRECISION);
-	// Bitwise-AND INDEX_MASK with the value returned by get(...) to get the
-	// next octant index. You can right-shift morton code to get the next index.
-	public static final long INDEX_MASK = 0b111;
 
-	// Takes 3 floating point values between [0, 1) and returns the corresponding
-	// Z-order curve. If one of the arguments is outside this range, a negative
-	// integer is returned. Note that this function actually returns reversed
-	// bit-sequence of the corresponding Morton code, so that you can bitwise-AND it
-	// with INDEX_MASK to get the next index.
+	// Takes 3 floating point values between (0, 1) and returns the
+	// corresponding Z-order curve. If any coordinate cannot be represented, a
+	// negative integer is returned. Note that this function actually returns
+	// reversed bit-sequence of the corresponding Morton code, so that you can
+	// bitwise-AND the last three bits to get the next index.
 	public static long get(double x, double y, double z) {
 		long _x = (long) (x * CLUSTERS_PER_DIMENSION);
 		long _y = (long) (y * CLUSTERS_PER_DIMENSION);
@@ -29,7 +25,7 @@ public class MortonCode {
 	}
 
 	private static boolean inRange(long val) {
-		return 0 <= val && val < CLUSTERS_PER_DIMENSION;
+		return 0 < val && val < CLUSTERS_PER_DIMENSION;
 	}
 
 	// Space out the first 21 bits of 'x'. Argument 'x' must be < 2^21. Otherwise,

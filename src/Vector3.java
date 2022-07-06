@@ -2,6 +2,7 @@ import codedraw.CodeDraw;
 
 public class Vector3 {
 
+	// TODO: Make private
 	public double x;
 	public double y;
 	public double z;
@@ -27,6 +28,7 @@ public class Vector3 {
 		this.z = value;
 	}
 
+	// TODO: Remove ?
 	public void setToZero() {
 		this.x = 0;
 		this.y = 0;
@@ -56,12 +58,20 @@ public class Vector3 {
 		z /= len;
 	}
 
+	// TODO refactor
 	public double distanceSqrd(Vector3 v) {
 		return (v.x - x) * (v.x - x) + (v.y - y) * (v.y - y) + (v.z - z) * (v.z - z);
 	}
 
 	public String toString() {
 		return String.format("[%g, %g, %g]", x, y, z);
+	}
+
+	public long getMortonCode(Vector3 origin, double size) {
+		double _x = (x - origin.x) / size;
+		double _y = (y - origin.y) / size;
+		double _z = (z - origin.z) / size;
+		return MortonCode.get(_x, _y, _z);
 	}
 
 	// Draws a filled circle with a specified radius centered at the (x,y)
