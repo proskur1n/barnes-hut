@@ -4,9 +4,9 @@ import java.awt.Color;
 
 public class Body {
 
-	private final Vector3 position;
-	private final Vector3 velocity;
-	private final double mass;
+	private Vector3 position;
+	private Vector3 velocity;
+	private double mass;
 	private Vector3 force;
 	private Color color;
 

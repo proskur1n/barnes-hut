@@ -7,9 +7,6 @@ compile: build/$(MAIN_FILE).class
 run: compile
 	java $(RUN_OPTIONS) $(MAIN_FILE)
 
-benchmark: build/Benchmark.class
-	java $(RUN_OPTIONS) Benchmark
-
 clean:
 	rm -rf build
 

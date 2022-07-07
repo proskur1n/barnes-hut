@@ -1,6 +1,8 @@
+import java.util.NoSuchElementException;
+
 public class Test {
 	public static void main(String[] args) {
-		section("Test Morton Code");
+		section("Test MortonCode");
 		{
 			for (int i = 0; i < 20; ++i) {
 				double x = Math.random();
@@ -11,9 +13,34 @@ public class Test {
 				long expected = simpleMortonCode(x, y, z);
 				checkBits(morton, expected);
 			}
-			checkValue(MortonCode.get(1.1, 0.5, 0.1), -1);
-			checkValue(MortonCode.get(-50, -10, 0.0), -1);
-			checkValue(MortonCode.get(-0.001, 0.1, 0.1), -1);
+			checkValue(MortonCode.get(1.1, 0.5, 0.1), -1L);
+			checkValue(MortonCode.get(-50, -10, 0.0), -1L);
+			checkValue(MortonCode.get(-0.001, 0.1, 0.1), -1L);
+			end();
+		}
+		section("Test BodyMortonCodePair");
+		{
+			Body b1 = new Body(0.0, new Vector3(0.0), new Vector3(0.0));
+			BodyMortonCodePair pair1 = new BodyMortonCodePair(b1, new Vector3(0.0), 10.0);
+			checkValue(pair1.hasNextOctant(), true);
+
+			Body b2 = new Body(0.0, new Vector3(-2.0, 1.0, 1.0), new Vector3(0.0));
+			BodyMortonCodePair pair2 = new BodyMortonCodePair(b2, new Vector3(0.0), 10.0);
+			checkValue(pair2.hasNextOctant(), false);
+
+			Body b3 = new Body(0.0, new Vector3(-1.0), new Vector3(0.0));
+			BodyMortonCodePair pair3 = new BodyMortonCodePair(b3, new Vector3(-5.0), 25.0);
+			checkValue(pair3.hasNextOctant(), true);
+
+			for (int i = 0; i < MortonCode.PRECISION; ++i) {
+				pair3.nextOctant();
+			}
+			try {
+				pair3.nextOctant();
+				checkValue(true, false);
+			} catch (NoSuchElementException e) {
+				checkValue(true, true);
+			}
 			end();
 		}
 	}
@@ -59,8 +86,8 @@ public class Test {
 		}
 	}
 
-	private static void checkValue(long given, long expected) {
-		if (given != expected) {
+	private static <T> void checkValue(T given, T expected) {
+		if (!given.equals(expected)) {
 			error(given, expected);
 		}
 	}

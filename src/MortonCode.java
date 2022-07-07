@@ -5,7 +5,7 @@ public class MortonCode {
 	public static final int PRECISION = 21;
 	public static final long CLUSTERS_PER_DIMENSION = 1 << PRECISION;
 
-	// Takes 3 floating point values between (0, 1) and returns the
+	// Takes 3 floating point values between [0, 1) and returns the
 	// corresponding Z-order curve. If any coordinate cannot be represented, a
 	// negative integer is returned. Note that this function actually returns
 	// reversed bit-sequence of the corresponding Morton code, so that you can
@@ -25,7 +25,7 @@ public class MortonCode {
 	}
 
 	private static boolean inRange(long val) {
-		return 0 < val && val < CLUSTERS_PER_DIMENSION;
+		return 0 <= val && val < CLUSTERS_PER_DIMENSION;
 	}
 
 	// Space out the first 21 bits of 'x'. Argument 'x' must be < 2^21. Otherwise,
