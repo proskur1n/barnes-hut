@@ -6,13 +6,15 @@ public class BodyMortonCodePair {
 
 	private final Body body;
 	private long mortonCode;
-	private int remaining = MortonCode.PRECISION;
+	private int remaining;
 
 	public BodyMortonCodePair(Body body, Vector3 corner, double size) {
 		this.body = body;
 		this.mortonCode = body.position().getMortonCode(corner, size);
 		if (mortonCode < 0) {
 			this.remaining = 0;
+		} else {
+			this.remaining = MortonCode.PRECISION;
 		}
 	}
 
@@ -34,11 +36,12 @@ public class BodyMortonCodePair {
 	// Returns a number in the interval [0, 8) with the index of the next
 	// octant.
 	public int nextOctant() {
-		if (remaining-- <= 0) {
+		if (remaining <= 0) {
 			throw new NoSuchElementException("Not enough precision for subdivision");
 		}
 		int octant = (int) (mortonCode & 0b111);
-		mortonCode >>>= 3;
+		mortonCode >>= 3;
+		--remaining;
 		return octant;
 	}
 }
